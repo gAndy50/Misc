@@ -16,6 +16,7 @@ namespace SDLSharpFun
             Console.WriteLine("Press w to change screen to red.");
             Console.WriteLine("Press s to change screen to green.");
             Console.WriteLine("Press a to change screen to blue.");
+            Console.WriteLine("Press r to change screen to black.");
 
             int Width = 800;
             int Height = 600;
@@ -64,6 +65,11 @@ namespace SDLSharpFun
                         {
                             SDL.SDL_SetRenderDrawColor(ren, 0,0, 255, 0);
                             SDL.SDL_RenderFillRect(ren, ref rect);
+                        }
+                        else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_r)
+                        {
+                            SDL.SDL_SetRenderDrawColor(ren, 0, 0, 0, 0);
+                            SDL.SDL_RenderFillRect(ren,ref rect);
                         }
                     }
 
