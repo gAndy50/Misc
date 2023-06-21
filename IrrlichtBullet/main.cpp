@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 	//The ground
 	IAnimatedMesh* hillPlaneMesh = Smgr->addHillPlaneMesh("myHill", dimension2d<f32>(30, 30), dimension2d<u32>(10, 10), 0, 0, dimension2d<f32>(0, 0), dimension2d<f32>(10, 10));
 	ISceneNode* planeNode = Smgr->addAnimatedMeshSceneNode(hillPlaneMesh);
-	planeNode->setMaterialTexture(0, Driver->getTexture("*:/*/*/media/stones.jpg"));
+	planeNode->setMaterialTexture(0, Driver->getTexture("*/*/*/media/stones.jpg"));
 	planeNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	planeNode->setPosition(core::vector3df(0, -55, 0));
 
@@ -232,7 +232,7 @@ void AddBox(ISceneManager* Smgr, IVideoDriver* Driver)
 
 	IMeshSceneNode* cubeNode = Smgr->addCubeSceneNode(10.0f, NULL, -1, vector3df(0, 3, 10));
 	cubeNode->setMaterialType(EMT_SOLID);
-	cubeNode->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.jpg"));
+	cubeNode->setMaterialTexture(0, Driver->getTexture("*/*/*/media/wall.jpg"));
 	cubeNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	cubeNode->setVisible(false);
 
@@ -267,7 +267,7 @@ void ShootBox(ISceneManager* Smgr, IVideoDriver* Driver, vector3df& position, ve
 
 	ISceneNode* Node = Smgr->addCubeSceneNode(10.0f, NULL, -1, vector3df(0, 3, 10));
 	Node->setMaterialType(EMT_SOLID);
-	Node->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.jpg"));
+	Node->setMaterialTexture(0, Driver->getTexture("*/*/*/media/wall.jpg"));
 	Node->setMaterialFlag(video::EMF_LIGHTING, false);
 	Node->setVisible(false);
 
