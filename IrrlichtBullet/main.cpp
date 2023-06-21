@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 	//The ground
 	IAnimatedMesh* hillPlaneMesh = Smgr->addHillPlaneMesh("myHill", dimension2d<f32>(30, 30), dimension2d<u32>(10, 10), 0, 0, dimension2d<f32>(0, 0), dimension2d<f32>(10, 10));
 	ISceneNode* planeNode = Smgr->addAnimatedMeshSceneNode(hillPlaneMesh);
-	planeNode->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/stones.jpg"));
+	planeNode->setMaterialTexture(0, Driver->getTexture("*:/*/*/media/stones.jpg"));
 	planeNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	planeNode->setPosition(core::vector3df(0, -55, 0));
 
