@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 	//The ground
 	IAnimatedMesh* hillPlaneMesh = Smgr->addHillPlaneMesh("myHill", dimension2d<f32>(30, 30), dimension2d<u32>(10, 10), 0, 0, dimension2d<f32>(0, 0), dimension2d<f32>(10, 10));
 	ISceneNode* planeNode = Smgr->addAnimatedMeshSceneNode(hillPlaneMesh);
-	planeNode->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/stones.jpg"));
+	planeNode->setMaterialTexture(0, Driver->getTexture("/media/stones.jpg"));
 	planeNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	planeNode->setPosition(core::vector3df(0, -55, 0));
 
@@ -270,7 +270,7 @@ void AddBox(ISceneManager* Smgr, IVideoDriver* Driver)
 
 	IMeshSceneNode* cubeNode = Smgr->addCubeSceneNode(10.0f, NULL, -1, vector3df(0, 3, 10));
 	cubeNode->setMaterialType(EMT_SOLID);
-	cubeNode->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.jpg"));
+	cubeNode->setMaterialTexture(0, Driver->getTexture("/media/wall.jpg"));
 	cubeNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	cubeNode->setVisible(false);
 
@@ -297,7 +297,7 @@ void AddSphere(ISceneManager* Smgr, IVideoDriver* Driver)
 
 	IMeshSceneNode* sphereNode = Smgr->addSphereSceneNode(10.0f, 32);
 	sphereNode->setMaterialType(EMT_SOLID);
-	sphereNode->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/water.jpg"));
+	sphereNode->setMaterialTexture(0, Driver->getTexture("/media/water.jpg"));
 	sphereNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	sphereNode->setVisible(false);
 
@@ -330,7 +330,7 @@ void addChain(int chainCount, const btVector3& suspensionPoint, ISceneManager* S
 
 		IMeshSceneNode* Node = Smgr->addCubeSceneNode(8.0f, NULL, -1, vector3df(0, 0, 0), vector3df(0, 0, 0), vector3df(1, 1, 0.25f));
 		Node->setMaterialType(EMT_SOLID);
-		Node->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.jpg"));
+		Node->setMaterialTexture(0, Driver->getTexture("/media/wall.jpg"));
 		Node->setMaterialFlag(video::EMF_LIGHTING, false);
 		boxes[i]->setUserPointer(Node);
 	}
@@ -378,7 +378,7 @@ void ShootBox(ISceneManager* Smgr, IVideoDriver* Driver, vector3df& position, ve
 
 	ISceneNode* Node = Smgr->addCubeSceneNode(10.0f, NULL, -1, vector3df(0, 3, 10));
 	Node->setMaterialType(EMT_SOLID);
-	Node->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.jpg"));
+	Node->setMaterialTexture(0, Driver->getTexture("/media/wall.jpg"));
 	Node->setMaterialFlag(video::EMF_LIGHTING, false);
 	Node->setVisible(false);
 
@@ -418,7 +418,7 @@ void ShootSphere(ISceneManager* Smgr, IVideoDriver* Driver, vector3df& position,
 
 	IMeshSceneNode* sphereNode = Smgr->addSphereSceneNode(10.0f, 32);
 	sphereNode->setMaterialType(EMT_SOLID);
-	sphereNode->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/water.jpg"));
+	sphereNode->setMaterialTexture(0, Driver->getTexture("/media/water.jpg"));
 	sphereNode->setMaterialFlag(video::EMF_LIGHTING, false);
 	sphereNode->setVisible(false);
 
