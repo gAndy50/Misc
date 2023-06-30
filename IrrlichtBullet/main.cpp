@@ -177,7 +177,7 @@ void addSoftBody(const btScalar& s, const int numX, const int numY, const int fi
 		core::dimension2d<f32>(10, 10));
 
 	ISceneNode* Node = Smgr->addAnimatedMeshSceneNode(hillPlaneMesh);
-	Node->setMaterialTexture(0, Driver->getTexture("D:/Github/Irrlicht-1.8.5/media/wall.bmp"));
+	Node->setMaterialTexture(0, Driver->getTexture("media/wall.bmp"));
 	Node->setMaterialFlag(video::EMF_LIGHTING, false);
 	Node->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
 	Node->setPosition(core::vector3df(0, -40, 0));
