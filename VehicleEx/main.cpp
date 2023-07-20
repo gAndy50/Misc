@@ -598,7 +598,7 @@ void shootBox(PhysicsM& p)
 {
 	ISceneNode* cube = Smgr->addCubeSceneNode(10.0f, NULL, -1, vector3df(0, 3, 10));
 	cube->setMaterialType(EMT_SOLID);
-	cube->setMaterialTexture(0, Driver->getTexture("D:/Github/Irrlicht-1.8.5/media/wall.bmp"));
+	cube->setMaterialTexture(0, Driver->getTexture("media/wall.bmp"));
 	cube->setMaterialFlag(EMF_LIGHTING, false);
 
 	vector3df lookat = Cam->getTarget();
@@ -610,7 +610,7 @@ ISceneNode* createWheel()
 {
 	IAnimatedMesh* m = Smgr->getMesh("D:/Github/irrlicht-1.8.5./media/wheel.dae");
 	IAnimatedMeshSceneNode* animMod = Smgr->addAnimatedMeshSceneNode(m);
-	animMod->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/texture_tire1.jpg"));
+	animMod->setMaterialTexture(0, Driver->getTexture("media/texture_tire1.jpg"));
 	animMod->setMaterialFlag(EMF_LIGHTING, false);
 
 	return animMod;
@@ -620,12 +620,12 @@ ISceneNode* createChassis()
 {
 	IMeshSceneNode* chassis = Smgr->addCubeSceneNode(20, NULL, -1, vector3df(0, 0, 0), vector3df(0, 0, 0),
 		vector3df(1, 0.25, 2));
-	chassis->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.bmp"));
+	chassis->setMaterialTexture(0, Driver->getTexture("media/wall.bmp"));
 	chassis->setMaterialFlag(EMF_LIGHTING, false);
 
 	IMeshSceneNode* chassisCab = Smgr->addCubeSceneNode(5, chassis, -1, vector3df(0, 30, 4), vector3df(0, 0, 0),
 		vector3df(3.5, 10, 1));
-	chassisCab->setMaterialTexture(0, Driver->getTexture("D:/Github/irrlicht-1.8.5/media/wall.bmp"));
+	chassisCab->setMaterialTexture(0, Driver->getTexture("media/wall.bmp"));
 	chassisCab->setMaterialFlag(EMF_LIGHTING, false);
 
 	return chassis;
