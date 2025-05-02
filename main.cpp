@@ -1,3 +1,4 @@
+//Simple physics project using SFML 2 and Box 2D
 #include <stdlib.h>
 #include <stdio.h>
 
