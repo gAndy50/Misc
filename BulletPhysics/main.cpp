@@ -1,3 +1,7 @@
+//Uses Raylib for graphics
+//Uses Bullet 3D for physics
+//Written by Andy P.
+
 #include "src/btBulletDynamicsCommon.h"
 #include "src/btBulletCollisionCommon.h"
 
