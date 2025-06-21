@@ -1,302 +1,295 @@
-//Simple physics project using SFML 2 and Box 2D
-#include <stdlib.h>
-#include <stdio.h>
+//Simple Space Invaders Clone game
+//Written by Andy P.
+//Copyright (c) 2025
+//Using Raylib 5.5
 
 #include <iostream>
-#include <sstream>
-#include <string>
+#include <time.h>
 
-#include <SFML\System.hpp>
-#include <SFML\Graphics.hpp>
-#include <SFML\Window.hpp>
-#include <SFML\Audio.hpp>
-#include <SFML\Network.hpp>
+#include <raylib.h>
 
-#include <Box2D\Box2D.h>
 
-using namespace std;
+const int WIDTH = 1024;
+const int HEIGHT = 720;
 
-#define PTM_RATIO 32.0
+const int PLAYER_SPEED = 10;
+const int BULLET_SPEED = 10;
+const float ALIEN_SPEED = 0.1f;
 
-//methods
-void Init();
-void DrawGame();
-void GameLoop();
-void Shutdown();
+const int MAX_PARTICLES = 100;
 
-//globals
-bool GameRunning = true;
-sf::RenderWindow GameWin;
-
-sf::RectangleShape box;
-sf::RectangleShape box2;
-sf::RectangleShape ground;
-sf::RectangleShape wall;
-sf::RectangleShape wall2;
-
-b2Vec2 gravity(0.0f,9.8f);
-b2World* World;
-
-b2Body* groundBody;
-b2BodyDef groundBodyDef;
-b2Body* wallBody;
-b2BodyDef wallBodyDef;
-b2Body* wallBody2;
-b2BodyDef wallBodyDef2;
-
-b2Body* Body;
-b2BodyDef ballBodyDef;
-b2Vec2 ballVector;
-
-b2PolygonShape groundBox;
-b2FixtureDef boxShapeDef;
-
-b2PolygonShape wallBox;
-b2FixtureDef wallBoxDef;
-
-b2PolygonShape wallBox2;
-b2FixtureDef wallBoxDef2;
-
-b2Body* Body2;
-b2BodyDef ballBodyDef2;
-b2Vec2 ballVector2;
-
-b2PolygonShape dynamicBox;
-b2FixtureDef fixtureDef;
-b2PolygonShape dynamicBox2;
-b2FixtureDef fixtureDef2;
-
-float timeStep;
-int32 velIter, posIter;
-
-bool Paused = true;
-
-sf::Font font;
-sf::Text PauseText;
-
-string pauseText; 
-
-int main(int argc, char* argv[])
+typedef struct PARTICLE
 {
-	Init();
+	Vector2 position;
+	Vector2 velocity;
+	float lifetime;
+	float size;
+	Color color;
+}PARTICLE;
 
-	GameLoop();
-
-	Shutdown();
-
-	return EXIT_SUCCESS;
-}
-
-void Init()
+typedef struct ParticleSystem
 {
-	GameWin.create(sf::VideoMode(800, 600, 32), "Physics Test - [SFML & Box2D]");
+	PARTICLE* particles;
+	int maxParticles;
+	int activeParticles;
+}ParticleSystem;
 
-	if (!font.loadFromFile("arial.ttf"))
+typedef struct PLAYER
+{
+	Vector2 position;
+	float width, height;
+	long score;
+}PLAYER;
+
+typedef struct BULLET
+{
+	Vector2 position;
+	bool active;
+	float speed;
+}BULLET;
+
+typedef struct ALIEN
+{
+	Vector2 position;
+	bool active;
+	float width, height;
+	int points;
+}ALIEN;
+
+PLAYER Player;
+
+ALIEN Aliens[30] = {};
+int alienCount = 0;
+
+void CreateAlien();
+void DoAlien();
+
+void InitParticle(ParticleSystem* ps, int maxParticles);
+void UpdateParticles(ParticleSystem* ps);
+void DrawParticles(ParticleSystem* ps);
+void SpawnGoo(ParticleSystem* ps, Vector2 position);
+void UpdateParticle(PARTICLE* particle);
+
+
+int main()
+{
+	InitWindow(WIDTH, HEIGHT, "Space Invaders Clone");
+	SetTargetFPS(60);
+
+	srand((unsigned int)time(NULL));
+
+	Player = { {WIDTH / 2 - 20, HEIGHT - 50}, 40,20 };
+	Player.score = 0;
+
+	BULLET Bullets[10] = { 0 };
+	int bulletIndex = 0;
+
+	CreateAlien();
+
+	ParticleSystem gooSystem;
+	InitParticle(&gooSystem, MAX_PARTICLES);
+
+	while (!WindowShouldClose())
 	{
-		exit(0);
-	}
-
-	PauseText.setFont(font);
-
-	pauseText = to_string(Paused);
-
-	PauseText.setCharacterSize(10);
-	PauseText.setString("PAUSED:" + pauseText);
-	PauseText.setPosition(sf::Vector2f(700, 10));
-	PauseText.setFillColor(sf::Color::Yellow);
-	
-	box.setPosition(sf::Vector2f(15, 5));
-	box.setSize(sf::Vector2f(10, 10));
-	box.setFillColor(sf::Color(255, 0, 0));
-
-	box2.setPosition(sf::Vector2f(50, 5));
-	box2.setSize(sf::Vector2f(15, 15));
-	box2.setFillColor(sf::Color(0, 255, 0));
-
-	ground.setPosition(sf::Vector2f(0, 540));
-	ground.setSize(sf::Vector2f(800, 560));
-	ground.setFillColor(sf::Color(0, 0,255));
-
-	wall.setPosition(sf::Vector2f(1, 1));
-	wall.setSize(sf::Vector2f(10, 580));
-	wall.setFillColor(sf::Color(0, 0, 255));
-
-	wall2.setPosition(sf::Vector2f(790, 1));
-	wall2.setSize(sf::Vector2f(10, 580));
-	wall2.setFillColor(sf::Color(0, 0, 255));
-
-	World = new b2World(gravity);
-	World->SetGravity(gravity);
-
-	groundBodyDef.type = b2_staticBody;
-	groundBodyDef.position.Set(0, 540);
-	groundBody = World->CreateBody(&groundBodyDef);
-
-	wallBodyDef.type = b2_staticBody;
-	wallBodyDef.position.Set(10, 580);
-	wallBody = World->CreateBody(&wallBodyDef);
-
-	wallBodyDef2.type = b2_staticBody;
-	wallBodyDef2.position.Set(790, 1);
-	wallBody2 = World->CreateBody(&wallBodyDef2);
-
-	ballBodyDef.type = b2_dynamicBody;
-	ballVector.Set(10, 10);
-	ballBodyDef.angularVelocity = 0.0f;
-	ballBodyDef.linearVelocity = ballVector;
-
-	ballBodyDef2.type = b2_dynamicBody;
-	ballVector2.Set(15, 15);
-	ballBodyDef2.angularVelocity = 0.0f;
-	ballBodyDef2.linearVelocity = ballVector2;
-
-	ballBodyDef.position.Set(15, 0);
-	ballBodyDef.awake = true;
-	Body = World->CreateBody(&ballBodyDef);
-
-	ballBodyDef2.position.Set(30, 0);
-	ballBodyDef2.awake = true;
-	Body2 = World->CreateBody(&ballBodyDef2);
-
-	boxShapeDef.shape = &groundBox;
-	boxShapeDef.density = 2.0f;
-	boxShapeDef.restitution = 0.5f;
-	groundBox.SetAsBox(800, 0);
-
-	groundBody->CreateFixture(&groundBox, 0);
-
-	wallBoxDef.shape = &wallBox;
-	wallBoxDef.density = 2.0f;
-	wallBoxDef.restitution = 0.5f;
-	wallBox.SetAsBox(1, 600);
-
-	wallBody->CreateFixture(&wallBox, 0);
-
-	wallBoxDef2.shape = &wallBox2;
-	wallBoxDef2.density = 2.0f;
-	wallBoxDef2.restitution = 0.5f;
-	wallBox2.SetAsBox(1, 600);
-
-	wallBody2->CreateFixture(&wallBox2, 0);
-
-	dynamicBox.SetAsBox(10.0f, 10.0f);
-
-	dynamicBox2.SetAsBox(10.0f, 10.0f);
-
-	fixtureDef.shape = &dynamicBox;
-	fixtureDef.density = 2.0f;
-	fixtureDef.friction = 1.5f;
-	fixtureDef.restitution = 0.9f;
-
-	Body->CreateFixture(&fixtureDef);
-
-	fixtureDef2.shape = &dynamicBox2;
-	fixtureDef2.density = 5.0f;
-	fixtureDef2.friction = 5.0f;
-	fixtureDef2.restitution = 1.0f;
-
-	Body2->CreateFixture(&fixtureDef2);
-
-	timeStep = 1.0f / 600.0f;
-	velIter = 1;
-	posIter = 1;
-
-	World->Step(timeStep, velIter, posIter);
-
-	b2Vec2 pos = Body->GetPosition();
-	float angle = Body->GetAngle();
-
-	box.setPosition(pos.x, pos.y);
-	box.setRotation(angle);
-
-	b2Vec2 pos2 = Body2->GetPosition();
-	float angle2 = Body2->GetAngle();
-
-	box2.setPosition(pos2.x, pos2.y);
-	box2.setRotation(angle2);
-}
-
-void GameLoop()
-{
-	while (GameRunning)
-	{
-		sf::Event Event;
-
-		while (GameWin.pollEvent(Event))
+		if (IsKeyDown(KEY_LEFT) && Player.position.x > 0)
 		{
-			if (Event.type == sf::Event::Closed)
-			{
-				GameWin.close();
-				GameRunning = false;
-			}
+			Player.position.x -= PLAYER_SPEED;
+		}
 
-			if (Event.type == sf::Event::KeyPressed)
-			{
-				if (Event.key.code == sf::Keyboard::Escape)
-				{
-					GameWin.close();
-					GameRunning = false;
-				}
+		if (IsKeyDown(KEY_RIGHT) && Player.position.x < WIDTH - Player.width)
+		{
+			Player.position.x += PLAYER_SPEED;
+		}
 
-				if (Event.key.code == sf::Keyboard::P && Paused == true)
-				{
-					Paused = false;
-				}
-				else if (Event.key.code == sf::Keyboard::P && Paused == false)
-				{
-					Paused = true;
-				}
-			}
-
-			if (Event.type == sf::Event::KeyReleased)
+		
+		for (int i = 0; i < 10; i++)
+		{
+			if (Bullets[i].active)
 			{
-				
+				Bullets[i].position.y -= Bullets[i].speed;
+				if (Bullets[i].position.y < 0)
+				{
+					Bullets[i].active = false;
+				}
 			}
 		}
 
-		if(!Paused)
-		World->Step(timeStep, velIter, posIter);
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				if (!Bullets[i].active)
+				{
+					Bullets[i].position = { Player.position.x + Player.width / 2 - 5, Player.position.y };
+					Bullets[i].active = true;
+					Bullets[i].speed = BULLET_SPEED;
+					break;
+				}
+			}
+		}
 
-		b2Vec2 pos = Body->GetPosition();
-		float angle = Body->GetAngle();
+		for (int i = 0; i < alienCount; i++)
+		{
+			if (Aliens[i].active)
+			{
+				Aliens[i].position.y += ALIEN_SPEED;
+			}
+		}
 
-		box.setPosition(pos.x, pos.y);
-		box.setRotation(angle);
+		
+			for (int i = 0; i < 10; i++)
+			{
+				if (Bullets[i].active)
+				{
+					for (int j = 0; j < alienCount; j++)
+					{
+						if (Aliens[j].active && CheckCollisionCircleRec(Bullets[i].position, 5, { Aliens[j].position.x,Aliens[j].position.y,Aliens[j].width,Aliens[j].height }))
+						{
+							SpawnGoo(&gooSystem, Aliens[j].position);
+							Bullets[i].active = false;
+							Aliens[j].active = false;
+							Player.score += Aliens->points;
+						}
+					}
+				}
+			}
+		
 
-		b2Vec2 pos2 = Body2->GetPosition();
-		float angle2 = Body2->GetAngle();
+		if (alienCount <= 0)
+		{
+			CreateAlien();
+		}
 
-		box2.setPosition(pos2.x, pos2.y);
-		box2.setRotation(angle2);
+		UpdateParticles(&gooSystem);
 
-		DrawGame();
+		BeginDrawing();
+
+		ClearBackground(BLACK);
+
+		DrawText(TextFormat("Score: %04i", Player.score), 1, 1, 20, YELLOW);
+
+		DrawRectangleV(Player.position, { Player.width,Player.height }, BLUE);
+
+		for (int i = 0; i < 10; i++)
+		{
+			if (Bullets[i].active)
+			{
+				DrawRectangleV(Bullets[i].position, { 10,20 }, YELLOW);
+			}
+		}
+
+		for (int i = 0; i < alienCount; i++)
+		{
+			if (Aliens[i].active)
+			{
+				DrawRectangleV(Aliens[i].position, { Aliens[i].width,Aliens[i].height }, GREEN);
+			}
+
+			if (!Aliens[i].active)
+			{
+				DrawParticles(&gooSystem);
+			}
+		}
+
+		EndDrawing();
+	}
+
+	free(gooSystem.particles);
+	CloseWindow();
+
+	return 0;
+}
+
+void CreateAlien()
+{
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 6; j++)
+		{
+			Aliens[alienCount].position = { (float)300 + j * 60, (float)50 + i * 40 };
+			Aliens[alienCount].active = true;
+			Aliens[alienCount].width = 40;
+			Aliens[alienCount].height = 30;
+			Aliens[alienCount].points = 10;
+			alienCount++;
+		}
 	}
 }
 
-void Shutdown()
+void DoAlien()
 {
-	World->DestroyBody(Body);
-	World->DestroyBody(Body2);
-	World->DestroyBody(groundBody);
-	World->DestroyBody(wallBody);
-	World->DestroyBody(wallBody2);
-
-	delete World;
+	for (int i = 0; i < alienCount; i++)
+	{
+		if (Aliens[i].active)
+		{
+			Aliens[i].position.y += ALIEN_SPEED;
+		}
+	}
 }
 
-void DrawGame()
+void InitParticle(ParticleSystem* ps, int maxParticles)
 {
-	GameWin.clear();
+	ps->maxParticles = maxParticles;
+	ps->activeParticles = 0;
+	ps->particles = (PARTICLE*)malloc(sizeof(PARTICLE) * maxParticles);
+}
 
-	GameWin.draw(PauseText);
-	
-	GameWin.draw(ground);
+void UpdateParticles(ParticleSystem* ps)
+{
+	for (int i = 0; i < ps->activeParticles; i++)
+	{
+		PARTICLE* p = &ps->particles[i];
+		UpdateParticle(p);
 
-	GameWin.draw(wall);
-	GameWin.draw(wall2);
+		if (p->lifetime <= 0.0f)
+		{
+			*p = ps->particles[ps->activeParticles - 1];
+			ps->activeParticles--;
+			i--;
+		}
+	}
+}
 
-	GameWin.draw(box);
-	GameWin.draw(box2);
+void UpdateParticle(PARTICLE* particle)
+{
+	particle->position.x += particle->velocity.x;
+	particle->position.y += particle->velocity.y;
 
-	GameWin.display();
+	particle->lifetime -= 0.02f;
+	particle->size = (particle->lifetime / 1.0f) * 5.0f;
+	particle->color.a = (unsigned char)(particle->lifetime * 255);
+
+	if (particle->lifetime < 0.0f)
+	{
+		particle->lifetime = 0.0f;
+	}
+}
+
+void DrawParticles(ParticleSystem* ps)
+{
+	for (int i = 0; i < ps->activeParticles; i++)
+	{
+		PARTICLE* p = &ps->particles[i];
+		DrawCircleV(p->position, p->size, p->color);
+	}
+}
+
+void SpawnGoo(ParticleSystem* ps, Vector2 position)
+{
+	int numParticles = 60;
+	for (int i = 0; i < numParticles; i++)
+	{
+		if (ps->activeParticles < ps->maxParticles)
+		{
+			PARTICLE* p = &ps->particles[ps->activeParticles];
+			p->position = position;
+			p->velocity.x = ((float)(rand() % 200 - 100)) / 100.0f;
+			p->velocity.y = ((float)(rand() % 200 - 100)) / 100.0f;
+			p->lifetime = (float)(rand() % 100) / 100.0f + 0.5f;
+			p->size = 4.0f;
+			p->color = { 0,255,0255 };
+
+			ps->activeParticles++;
+		}
+	}
 }
