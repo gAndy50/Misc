@@ -18,6 +18,12 @@ const float ALIEN_SPEED = 0.1f;
 
 const int MAX_PARTICLES = 100;
 
+float respawnTimer = 0.0f;
+const float respawnDelay = 2.0f;
+
+const float GRAVITY = 0.2f;
+const float GROUND_Y = (HEIGHT - 20);
+
 typedef struct PARTICLE
 {
 	Vector2 position;
@@ -70,6 +76,9 @@ void DrawParticles(ParticleSystem* ps);
 void SpawnGoo(ParticleSystem* ps, Vector2 position);
 void UpdateParticle(PARTICLE* particle);
 
+void RespawnAliens();
+
+bool AllAliensDestroyed();
 
 int main()
 {
@@ -101,7 +110,8 @@ int main()
 			Player.position.x += PLAYER_SPEED;
 		}
 
-		
+		respawnTimer += GetFrameTime();
+
 		for (int i = 0; i < 10; i++)
 		{
 			if (Bullets[i].active)
@@ -134,6 +144,13 @@ int main()
 			{
 				Aliens[i].position.y += ALIEN_SPEED;
 			}
+
+			if (Aliens[i].active && CheckCollisionRecs({ Player.position.x, Player.position.y, Player.width, Player.height }, { Aliens[i].position.x, Aliens[i].position.y, Aliens[i].width, Aliens[i].height }))
+			{
+				// End game logic
+				DrawText("GAME OVER!", WIDTH / 2 - 100, HEIGHT / 2, 40, RED);
+				break;
+			}
 		}
 
 		
@@ -148,17 +165,15 @@ int main()
 							SpawnGoo(&gooSystem, Aliens[j].position);
 							Bullets[i].active = false;
 							Aliens[j].active = false;
-							Player.score += Aliens->points;
+							Player.score += Aliens[j].points;
+							break;
 						}
+
 					}
 				}
 			}
 		
 
-		if (alienCount <= 0)
-		{
-			CreateAlien();
-		}
 
 		UpdateParticles(&gooSystem);
 
@@ -185,11 +200,18 @@ int main()
 				DrawRectangleV(Aliens[i].position, { Aliens[i].width,Aliens[i].height }, GREEN);
 			}
 
-			if (!Aliens[i].active)
+			/*if (!Aliens[i].active)
 			{
 				DrawParticles(&gooSystem);
-			}
+			}*/
 		}
+
+		if (AllAliensDestroyed() && respawnTimer >= respawnDelay)
+		{
+			RespawnAliens();
+		}
+
+		DrawParticles(&gooSystem);
 
 		EndDrawing();
 	}
@@ -252,8 +274,16 @@ void UpdateParticles(ParticleSystem* ps)
 
 void UpdateParticle(PARTICLE* particle)
 {
+	particle->velocity.y += GRAVITY;
+
 	particle->position.x += particle->velocity.x;
 	particle->position.y += particle->velocity.y;
+
+	if (particle->position.y >= GROUND_Y)
+	{
+		particle->position.y = GROUND_Y;
+		particle->velocity.y *= 0.5f;
+	}
 
 	particle->lifetime -= 0.02f;
 	particle->size = (particle->lifetime / 1.0f) * 5.0f;
@@ -292,4 +322,22 @@ void SpawnGoo(ParticleSystem* ps, Vector2 position)
 			ps->activeParticles++;
 		}
 	}
+}
+
+void RespawnAliens()
+{
+	alienCount = 0;
+	CreateAlien();
+}
+
+bool AllAliensDestroyed()
+{
+	for (int i = 0; i < alienCount; i++)
+	{
+		if (Aliens[i].active)  // If any alien is still active
+		{
+			return false;
+		}
+	}
+	return true;  // All aliens are inactive
 }
