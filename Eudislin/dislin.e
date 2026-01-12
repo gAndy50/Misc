@@ -2,7 +2,7 @@
 --EuDislin
 --Written by Andy P.
 --Icy Viking Software
---Copyright (c) 2025
+--Copyright (c) 2026
 ---------------------------
 include std/machine.e
 include std/ffi.e
@@ -4867,4 +4867,5 @@ public constant xzscale = define_c_proc(dis,"+zscale",{C_FLOAT,C_FLOAT})
 public procedure zscale(atom za,atom ze)
 	c_proc(xzscale,{za,ze})
 end procedure
-­585.9
+
+Â­585.9
