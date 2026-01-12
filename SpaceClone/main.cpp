@@ -1,6 +1,6 @@
 //Simple Space Invaders Clone game
 //Written by Andy P.
-//Copyright (c) 2025
+//Copyright (c) 2026
 //Using Raylib 5.5
 
 #include <iostream>
@@ -341,3 +341,4 @@ bool AllAliensDestroyed()
 	}
 	return true;  // All aliens are inactive
 }
+
