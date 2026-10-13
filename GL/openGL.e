@@ -1,3 +1,6 @@
+--Simple openGL wrapper for openEuphoria
+--Written by Andy P.
+--Copyright (c) 2026
 include std/ffi.e
 include std/machine.e
 
@@ -5,6 +8,8 @@ public atom gl
 
 ifdef WINDOWS then
 	gl = open_dll("opengl32.dll")
+	elsifdef LINUX or FREEBSD then
+	gl = open_dll("libOpenGL.so.0")
 end ifdef
 
 if gl = -1 then
@@ -702,4 +707,4 @@ public constant xglEnd = define_c_proc(gl,"+glEnd",{})
 public procedure glEnd()
 	c_proc(xglEnd,{})
 end procedure
-­703.18
+­12.32
